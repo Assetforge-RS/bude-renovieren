@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Renovierungs-Kalkulator Haus / Wohnung</title>
+  <style>
+    :root{
+      --bg:#f5f6f8; --card:#ffffff; --text:#1f2937; --muted:#6b7280;
+      --line:#e5e7eb; --accent:#2563eb; --ok:#059669; --warn:#d97706;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      background:var(--bg); color:var(--text); line-height:1.35;
+    }
+    header{
+      position:sticky; top:0; z-index:20; background:rgba(255,255,255,.95);
+      border-bottom:1px solid var(--line); padding:14px 16px;
+      backdrop-filter: blur(8px);
+    }
+    h1{font-size:20px;margin:0 0 4px}
+    h2{font-size:18px;margin:0 0 10px}
+    h3{font-size:15px;margin:14px 0 8px}
+    .wrap{max-width:900px;margin:0 auto;padding:14px}
+    .card{
+      background:var(--card); border:1px solid var(--line); border-radius:16px;
+      padding:14px; margin:12px 0; box-shadow:0 1px 2px rgba(0,0,0,.04);
+    }
+    label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+    input, select, textarea, button{
+      width:100%; font-size:16px; border-radius:12px; border:1px solid var(--line);
+      padding:10px; background:#fff; color:var(--text);
+    }
+    input[type="checkbox"]{width:auto; transform:scale(1.25); margin-right:8px}
+    .checkline{display:flex;align-items:center;gap:8px;font-size:16px;color:var(--text);margin:8px 0}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    @media(max-width:650px){.grid,.grid3{grid-template-columns:1fr}}
+    .summary{
+      display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;
+    }
+    .pill{background:#eef2ff;border-radius:14px;padding:10px;text-align:center}
+    .pill b{display:block;font-size:18px}
+    .small{font-size:12px;color:var(--muted)}
+    .row{display:grid;grid-template-columns:1.3fr .7fr .7fr;gap:8px;align-items:end}
+    @media(max-width:650px){.row{grid-template-columns:1fr}}
+    button{
+      background:var(--accent); color:#fff; border:0; font-weight:700; margin-top:8px;
+      cursor:pointer;
+    }
+    button.secondary{background:#111827}
+    button.light{background:#e5e7eb;color:#111827}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+    th{text-align:left;color:var(--muted);font-weight:600}
+    .total{font-size:22px;font-weight:800;color:var(--ok)}
+    .hide{display:none}
+    textarea{min-height:180px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px}
+    @media print{
+      header,.no-print,button,input,select,label,.checkline{display:none!important}
+      body{background:#fff}
+      .card{box-shadow:none;border:0}
+      .hide{display:block}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Renovierungs-Kalkulator</h1>
+  <div class="small">Für Haus / Wohnung mit EG, OG und Keller – iPhone-optimiert</div>
+</header>
+
+<div class="wrap">
+  <section class="card">
+    <h2>Objekt</h2>
+    <div class="grid">
+      <div><label>Objekt / Adresse</label><input id="objekt" value="Utes Immobilie"></div>
+      <div><label>Datum</label><input id="datum" type="date"></div>
+      <div><label>Wohnfläche gesamt m²</label><input id="wohn" type="number" value="100"></div>
+      <div><label>Kellerfläche m²</label><input id="keller" type="number" value="50"></div>
+      <div><label>Anzahl Bäder</label><input id="baeder" type="number" value="1"></div>
+      <div><label>Anzahl Zimmertüren</label><input id="tueren" type="number" value="8"></div>
+      <div><label>Anzahl Fenster</label><input id="fenster" type="number" value="10"></div>
+      <div><label>Stundensatz Fremdleistung €/h</label><input id="std" type="number" value="55"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Böden</h2>
+    <div class="small">Flächen in m² je Etage eintragen. Materialpreis und Verlegekosten werden getrennt kalkuliert.</div>
+    <h3>Erdgeschoss</h3>
+    <div class="grid3">
+      <div><label>Parkett m²</label><input id="eg_parkett" type="number" value="35"></div>
+      <div><label>Laminat m²</label><input id="eg_laminat" type="number" value="0"></div>
+      <div><label>Fliesen m²</label><input id="eg_fliesen" type="number" value="15"></div>
+    </div>
+    <h3>Obergeschoss</h3>
+    <div class="grid3">
+      <div><label>Parkett m²</label><input id="og_parkett" type="number" value="30"></div>
+      <div><label>Laminat m²</label><input id="og_laminat" type="number" value="20"></div>
+      <div><label>Fliesen m²</label><input id="og_fliesen" type="number" value="5"></div>
+    </div>
+    <h3>Keller</h3>
+    <div class="grid3">
+      <div><label>Parkett m²</label><input id="kg_parkett" type="number" value="0"></div>
+      <div><label>Laminat m²</label><input id="kg_laminat" type="number" value="0"></div>
+      <div><label>Fliesen m²</label><input id="kg_fliesen" type="number" value="20"></div>
+    </div>
+    <h3>Einheitspreise Boden</h3>
+    <div class="grid3">
+      <div><label>Parkett Material €/m²</label><input id="parkett_mat" type="number" value="55"></div>
+      <div><label>Laminat Material €/m²</label><input id="laminat_mat" type="number" value="22"></div>
+      <div><label>Fliesen Material €/m²</label><input id="fliesen_mat" type="number" value="35"></div>
+      <div><label>Parkett verlegen €/m²</label><input id="parkett_lhn" type="number" value="35"></div>
+      <div><label>Laminat verlegen €/m²</label><input id="laminat_lhn" type="number" value="18"></div>
+      <div><label>Fliesen verlegen €/m²</label><input id="fliesen_lhn" type="number" value="55"></div>
+    </div>
+    <label>Ausführung Böden</label>
+    <select id="boden_exec"><option value="fremd">machen lassen</option><option value="selbst">selbst machen</option><option value="mix">Material kaufen, Teil Eigenleistung</option></select>
+  </section>
+
+  <section class="card">
+    <h2>Bäder / Fliesen</h2>
+    <div class="grid">
+      <div><label>Neue Badfliesen m²</label><input id="bad_fliesen_m2" type="number" value="35"></div>
+      <div><label>Badfliese Material €/m²</label><input id="bad_fliesen_mat" type="number" value="40"></div>
+      <div><label>Bad fliesen lassen €/m²</label><input id="bad_fliesen_lhn" type="number" value="65"></div>
+      <div><label>Sanitär / Badmöbel pauschal €</label><input id="bad_sanitaer" type="number" value="4500"></div>
+    </div>
+    <label>Bad-Ausführung</label>
+    <select id="bad_exec"><option value="fremd">machen lassen</option><option value="selbst">selbst machen</option><option value="teil">Fliesen selbst, Sanitär fremd</option></select>
+  </section>
+
+  <section class="card">
+    <h2>Gewerke</h2>
+
+    <label>Heizung</label>
+    <select id="heizung">
+      <option value="0">nichts machen</option>
+      <option value="350">Wartung</option>
+      <option value="12000">Heizung 1:1 austauschen</option>
+      <option value="32000">Wärmepumpe</option>
+    </select>
+
+    <label>Elektrik</label>
+    <select id="elektro">
+      <option value="0">nichts machen</option>
+      <option value="1200">nur Steckdosen / Schalter tauschen</option>
+      <option value="2500">Verteilerkasten erneuern</option>
+      <option value="14000">komplette Elektrik erneuern</option>
+    </select>
+
+    <label>Fenster</label>
+    <select id="fenster_art">
+      <option value="0">nichts machen</option>
+      <option value="450">Fenster kaufen und selbst einbauen – €/Stück</option>
+      <option value="850">Fenster komplett vergeben – €/Stück</option>
+    </select>
+
+    <label>Wände</label>
+    <select id="waende">
+      <option value="0">nichts machen</option>
+      <option value="1200">nur streichen / Schadstellen ausbessern</option>
+      <option value="4500">Wände komplett ausbessern, tapezieren, streichen</option>
+      <option value="8500">Wände komplett neu machen lassen</option>
+    </select>
+
+    <label>Haustür</label>
+    <select id="haustuer">
+      <option value="0">nichts machen</option>
+      <option value="350">Haustür streichen</option>
+      <option value="3500">neue Haustür komplett</option>
+    </select>
+
+    <label>Zimmertüren</label>
+    <select id="zimmertueren">
+      <option value="0">nichts machen</option>
+      <option value="35">nur neue Türgriffe – €/Tür</option>
+      <option value="300">neue Tür – Material €/Tür</option>
+    </select>
+    <label>Montage Zimmertüren</label>
+    <select id="tueren_exec"><option value="0">selbst montieren</option><option value="120">machen lassen – €/Tür</option></select>
+
+    <label>Entkernung</label>
+    <select id="entkernung">
+      <option value="0">selbst machen</option>
+      <option value="3000">Entkernung machen lassen</option>
+      <option value="6000">umfangreiche Entkernung machen lassen</option>
+    </select>
+
+    <label>Müll / Container</label>
+    <select id="muell">
+      <option value="500">Container selbst anmelden – 500 €</option>
+      <option value="900">Container + Organisation machen lassen – 900 €</option>
+    </select>
+  </section>
+
+  <section class="card">
+    <h2>Zusatzpositionen</h2>
+    <div class="checkline"><input type="checkbox" id="reserve_on" checked> Sicherheitsreserve einrechnen</div>
+    <div class="grid">
+      <div><label>Reserve %</label><input id="reserve" type="number" value="15"></div>
+      <div><label>Sonstige Kosten pauschal €</label><input id="sonst" type="number" value="2500"></div>
+    </div>
+    <label>Besonderheiten / Annahmen</label>
+    <textarea id="notizen">Ziel: Renovierung der Immobilie mit zwei Etagen und Keller. Kosten als grobe Vorplanung, Angebote müssen später eingeholt werden.</textarea>
+  </section>
+
+  <section class="card">
+    <h2>Kalkulation</h2>
+    <div class="summary">
+      <div class="pill"><b id="sum_netto">0 €</b><span class="small">Zwischensumme</span></div>
+      <div class="pill"><b id="sum_reserve">0 €</b><span class="small">Reserve</span></div>
+      <div class="pill"><b id="sum_total">0 €</b><span class="small">Gesamt</span></div>
+    </div>
+    <button onclick="calc()">Neu berechnen</button>
+    <button class="secondary" onclick="makeReport()">Bericht erzeugen</button>
+    <button class="light" onclick="window.print()">Drucken / als PDF speichern</button>
+  </section>
+
+  <section class="card">
+    <h2>Positionsübersicht</h2>
+    <table id="posTable">
+      <thead><tr><th>Position</th><th>Menge</th><th>Kosten</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Bericht</h2>
+    <textarea id="bericht" placeholder="Hier wird der Bericht erzeugt ..."></textarea>
+  </section>
+</div>
+
+<script>
+function v(id){ return Number(document.getElementById(id).value || 0); }
+function s(id){ return document.getElementById(id).value; }
+function euro(n){ return Math.round(n).toLocaleString('de-DE') + ' €'; }
+function add(arr, name, menge, kosten){ if(kosten>0) arr.push({name, menge, kosten}); }
+
+function floorCost(prefix, mat, lhn, exec){
+  let m2 = v(prefix);
+  let labor = exec === 'selbst' ? 0 : (exec === 'mix' ? lhn * 0.5 : lhn);
+  return {m2, cost: m2 * (mat + labor)};
+}
+
+function calc(){
+  let pos = [];
+  let bodenExec = s('boden_exec');
+  let parkettM2 = v('eg_parkett')+v('og_parkett')+v('kg_parkett');
+  let laminatM2 = v('eg_laminat')+v('og_laminat')+v('kg_laminat');
+  let fliesenM2 = v('eg_fliesen')+v('og_fliesen')+v('kg_fliesen');
+  let laborFactor = bodenExec === 'selbst' ? 0 : (bodenExec === 'mix' ? .5 : 1);
+  add(pos, "Böden Parkett", parkettM2+" m²", parkettM2*(v('parkett_mat')+v('parkett_lhn')*laborFactor));
+  add(pos, "Böden Laminat", laminatM2+" m²", laminatM2*(v('laminat_mat')+v('laminat_lhn')*laborFactor));
+  add(pos, "Böden Fliesen", fliesenM2+" m²", fliesenM2*(v('fliesen_mat')+v('fliesen_lhn')*laborFactor));
+
+  let badExec = s('bad_exec');
+  let badLabor = badExec === 'selbst' ? 0 : v('bad_fliesen_lhn');
+  let badSan = badExec === 'selbst' ? v('bad_sanitaer')*.65 : v('bad_sanitaer');
+  add(pos, "Badfliesen", v('bad_fliesen_m2')+" m²", v('bad_fliesen_m2')*(v('bad_fliesen_mat')+badLabor));
+  add(pos, "Sanitär / Badmöbel", v('baeder')+" Bad/Bäder", badSan);
+
+  add(pos, "Heizung", document.getElementById('heizung').selectedOptions[0].text, v('heizung'));
+  add(pos, "Elektrik", document.getElementById('elektro').selectedOptions[0].text, v('elektro'));
+  add(pos, "Fenster", v('fenster')+" Stück", v('fenster_art')*v('fenster'));
+  add(pos, "Wände", document.getElementById('waende').selectedOptions[0].text, v('waende'));
+  add(pos, "Haustür", document.getElementById('haustuer').selectedOptions[0].text, v('haustuer'));
+  add(pos, "Zimmertüren", v('tueren')+" Stück", v('zimmertueren')*v('tueren') + v('tueren_exec')*v('tueren'));
+  add(pos, "Entkernung", document.getElementById('entkernung').selectedOptions[0].text, v('entkernung'));
+  add(pos, "Müll / Container", document.getElementById('muell').selectedOptions[0].text, v('muell'));
+  add(pos, "Sonstige Kosten", "pauschal", v('sonst'));
+
+  let netto = pos.reduce((a,p)=>a+p.kosten,0);
+  let reserve = document.getElementById('reserve_on').checked ? netto * v('reserve')/100 : 0;
+  let total = netto + reserve;
+
+  document.getElementById('sum_netto').innerText = euro(netto);
+  document.getElementById('sum_reserve').innerText = euro(reserve);
+  document.getElementById('sum_total').innerText = euro(total);
+
+  let tbody = document.querySelector("#posTable tbody");
+  tbody.innerHTML = "";
+  pos.forEach(p=>{
+    let tr = document.createElement("tr");
+    tr.innerHTML = `<td>${p.name}</td><td>${p.menge}</td><td>${euro(p.kosten)}</td>`;
+    tbody.appendChild(tr);
+  });
+  return {pos, netto, reserve, total};
+}
+
+function makeReport(){
+  let r = calc();
+  let lines = [];
+  lines.push("RENOVIERUNGSBERICHT / KOSTENSCHÄTZUNG");
+  lines.push("");
+  lines.push("Objekt: " + s('objekt'));
+  lines.push("Datum: " + s('datum'));
+  lines.push("Wohnfläche: " + v('wohn') + " m²");
+  lines.push("Kellerfläche: " + v('keller') + " m²");
+  lines.push("Bäder: " + v('baeder') + " | Fenster: " + v('fenster') + " | Zimmertüren: " + v('tueren'));
+  lines.push("");
+  lines.push("AUSGEWÄHLTE MASSNAHMEN");
+  r.pos.forEach((p,i)=> lines.push((i+1)+". "+p.name+" – "+p.menge+" – "+euro(p.kosten)));
+  lines.push("");
+  lines.push("KOSTENZUSAMMENFASSUNG");
+  lines.push("Zwischensumme: " + euro(r.netto));
+  lines.push("Reserve: " + euro(r.reserve));
+  lines.push("Gesamtkosten grob: " + euro(r.total));
+  lines.push("");
+  lines.push("ARBEITSSCHRITTE");
+  lines.push("1. Objekt begehen, Mengen prüfen, Fotos machen.");
+  lines.push("2. Container / Müllentsorgung organisieren.");
+  lines.push("3. Entkernung: alte Böden, Küche, Badobjekte, Türen, lose Bauteile entfernen.");
+  lines.push("4. Rohinstallation prüfen: Elektrik, Heizung, Wasserleitungen, Fenster.");
+  lines.push("5. Technische Gewerke ausführen oder Angebote einholen.");
+  lines.push("6. Wände instandsetzen, spachteln, tapezieren oder streichen.");
+  lines.push("7. Bäder fliesen und Sanitär montieren.");
+  lines.push("8. Böden verlegen nach Etage und Material.");
+  lines.push("9. Türen, Griffe, Haustür und Restarbeiten ausführen.");
+  lines.push("10. Endreinigung, Abnahme, Kostenabgleich.");
+  lines.push("");
+  lines.push("ANNAHMEN / BESONDERHEITEN");
+  lines.push(document.getElementById('notizen').value);
+  lines.push("");
+  lines.push("Hinweis: Diese Kalkulation ist eine grobe Vorplanung. Für Kaufentscheidung, Finanzierung und Vergabe sollten verbindliche Angebote eingeholt werden.");
+  document.getElementById('bericht').value = lines.join("\n");
+}
+
+document.getElementById('datum').valueAsDate = new Date();
+document.querySelectorAll("input,select,textarea").forEach(el => el.addEventListener("change", calc));
+calc();
+makeReport();
+</script>
+</body>
+</html>
